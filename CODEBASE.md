@@ -7,12 +7,17 @@ What every file does. One place to look before opening any file.
 ## Entry Points
 
 **`Makefile`**
-- Defines `make install`, `make start`, and `make now` — the three commands to run the whole system.
-- `start` runs the webhook server + both scheduled jobs. `now` runs both reports immediately then starts the server.
+- `make install` — installs all dependencies.
+- `make reports` — runs both reports immediately and exits. No webhook server. Use this to demo reports standalone.
+- `make reports-scheduled` — runs both reports on their real schedules (weekdays 9 AM / Mondays 8 AM). No webhook server.
+- `make start` — full system: webhook server for AI PR review + both reports on their real schedules.
+- `make now` — both reports immediately, then starts the webhook server.
 
 **`src/runner.py`**
-- The engine behind `make start` and `make now`.
-- `start` mode: launches the Flask server in a background thread and uses the `schedule` library to fire both report scripts at their configured times.
+- The engine behind all four `make` commands — reads the mode from the command-line argument and routes to the right function.
+- `reports` mode: runs both report scripts immediately and exits cleanly.
+- `reports-scheduled` mode: registers both report schedules and runs the schedule loop — no webhook server.
+- `start` mode: launches the Flask webhook server in a background thread, registers both schedules, then runs the schedule loop.
 - `now` mode: runs both report scripts immediately, then starts the webhook server.
 
 ---
