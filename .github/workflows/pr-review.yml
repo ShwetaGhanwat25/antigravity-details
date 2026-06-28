@@ -1,5 +1,12 @@
+# Overview: This is the GitHub Actions workflow that triggers the AI review automatically.
+# It runs on every PR that is opened or updated against the main branch.
+# GitHub spins up a fresh Ubuntu runner, installs the Python dependencies, then calls
+# handle_pr() from reviewer.py with the PR details from the event payload.
+
 name: PR Review Bot
 
+# Trigger: run this workflow whenever a PR is opened or new commits are pushed to an open PR.
+# We only watch PRs targeting main — feature-to-feature PRs are ignored.
 on:
   pull_request:
     types: [opened, synchronize]
@@ -8,24 +15,32 @@ on:
 jobs:
   review:
     runs-on: ubuntu-latest
+
+    # Permissions: the bot needs to write comments and labels but only read code.
     permissions:
       pull-requests: write
       issues: write
       contents: read
 
     steps:
+      # Step 1: Check out the repository so the runner has access to src/reviewer.py.
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Step 2: Install the Python packages that reviewer.py depends on.
       - name: Install dependencies
         run: pip install google-genai requests
 
+      # Step 3: Run the review by importing handle_pr and calling it with the PR event data.
+      # We use "shell: python" so the run block is executed directly as a Python script.
       - name: Review PR with Gemini
         shell: python
         env:
+          # Pass API keys and webhook URL from GitHub secrets so they are never in the code.
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+          # Pass PR details from the GitHub Actions event context as environment variables.
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
@@ -34,9 +49,11 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           import os, sys
+          # Add the src/ folder to the Python path so we can import reviewer.py directly.
           sys.path.insert(0, "src")
           from reviewer import handle_pr
 
+          # Build a webhook-style payload dict from the environment variables and call the reviewer.
           handle_pr({
               "repository": {"full_name": os.environ["REPO"]},
               "pull_request": {
