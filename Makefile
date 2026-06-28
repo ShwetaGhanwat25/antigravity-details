@@ -1,5 +1,5 @@
 # Overview: These are the project's runnable commands — the Python equivalent of npm scripts.
-# Run them from the auto-pr-review/ directory with: make <command>
+# Run them from the project root with: make <command>
 #
 #   make install             → install all dependencies
 #
