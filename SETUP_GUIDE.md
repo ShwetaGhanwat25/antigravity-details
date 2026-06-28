@@ -33,7 +33,7 @@ Complete this once. After setup, the bot runs automatically on every PR.
 
 ## Step 2 — Create Your .env File
 
-In the `auto-pr-review/` folder, create a `.env` file:
+In the project root, create a `.env` file:
 
 ```env
 GEMINI_API_KEY=AIza...

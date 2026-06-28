@@ -48,7 +48,7 @@ python src/test_reviewer.py --live <PR#>     # full live run on a real PR
 ## Project Structure
 
 ```
-auto-pr-review/
+project root/
 ├── Makefile                              # make start / make now / make install
 ├── src/
 │   ├── runner.py                         # entry point for both run modes
