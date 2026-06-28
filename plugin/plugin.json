@@ -1,0 +1,35 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "pr-review",
+  "version": "1.0.0",
+  "description": "Manual PR review trigger for the Antigravity CLI. Run 'antigravity pr-review <repo> <pr-number>' to instantly trigger an AI-powered code review on any GitHub PR without waiting for a webhook event.",
+  "author": "Shweta Ghanwat",
+  "skills": [
+    "skills/pr-review-trigger/SKILL.md"
+  ],
+  "mcps": [
+    "../../mcp/github-mcp/mcp_config.json",
+    "../../mcp/google-chat-mcp/mcp_config.json"
+  ],
+  "commands": {
+    "pr-review": {
+      "description": "Trigger an AI code review on a GitHub PR",
+      "usage": "antigravity pr-review <repo> <pr-number>",
+      "examples": [
+        "antigravity pr-review org/my-repo 42",
+        "antigravity pr-review org/my-repo 42 --no-chat"
+      ],
+      "flags": {
+        "--no-chat": "Skip Google Chat notification (review still posts to GitHub)",
+        "--dry-run": "Print the review to terminal only — do not post to GitHub or Chat"
+      }
+    }
+  },
+  "env_required": [
+    "GEMINI_API_KEY",
+    "GITHUB_TOKEN"
+  ],
+  "env_optional": [
+    "GOOGLE_CHAT_SPACE_ID"
+  ]
+}

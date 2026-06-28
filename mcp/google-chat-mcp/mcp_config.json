@@ -1,0 +1,39 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/mcp_config.json",
+  "name": "google-chat-mcp",
+  "description": "Google Chat integration for PR review notifications. Uses the official Google Chat remote MCP server to post review summaries, stale PR alerts, and weekly reports to a designated Google Chat space.",
+  "transport": "sse",
+  "url": "https://chatmcp.googleapis.com/mcp/v1",
+  "auth": {
+    "type": "oauth2",
+    "scopes": [
+      "https://www.googleapis.com/auth/chat.messages.create",
+      "https://www.googleapis.com/auth/chat.spaces.readonly"
+    ]
+  },
+  "config": {
+    "default_space": "${GOOGLE_CHAT_SPACE_ID}",
+    "bot_display_name": "PR Review Bot"
+  },
+  "tools": [
+    {
+      "name": "send_message",
+      "description": "Send a formatted message to a Google Chat space",
+      "parameters": {
+        "space_id": {
+          "type": "string",
+          "description": "Google Chat space ID. Defaults to the configured default_space if omitted."
+        },
+        "text": {
+          "type": "string",
+          "description": "Message body. Supports Google Chat markdown: *bold*, _italic_, `code`, and <url|link text> hyperlinks."
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Authentication is handled natively by Antigravity — click 'Authenticate' next to google-chat-mcp in the MCP panel and sign in with your Google Workspace account.",
+    "GOOGLE_CHAT_SPACE_ID can be found in the Chat space URL: spaces/{id}",
+    "The bot must be added to the target Chat space before it can post messages."
+  ]
+}

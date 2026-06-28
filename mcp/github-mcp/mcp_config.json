@@ -1,0 +1,78 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/mcp_config.json",
+  "name": "github-mcp",
+  "description": "GitHub REST API integration for PR review workflows. Provides tools to fetch PR diffs, post review comments, manage inline annotations, apply labels, and query open PRs.",
+  "transport": "stdio",
+  "command": "python",
+  "args": ["src/github_mcp_server.py"],
+  "env": {
+    "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+  },
+  "tools": [
+    {
+      "name": "get_pr_diff",
+      "description": "Fetch the raw unified diff for a pull request",
+      "parameters": {
+        "repo": { "type": "string", "description": "Full repo name e.g. org/repo-name" },
+        "pr_number": { "type": "integer", "description": "Pull request number" }
+      }
+    },
+    {
+      "name": "post_pr_comment",
+      "description": "Post a general markdown comment on a pull request",
+      "parameters": {
+        "repo": { "type": "string" },
+        "pr_number": { "type": "integer" },
+        "body": { "type": "string", "description": "Markdown content of the comment" }
+      }
+    },
+    {
+      "name": "post_inline_comment",
+      "description": "Post an inline review comment on a specific line of the PR diff",
+      "parameters": {
+        "repo": { "type": "string" },
+        "pr_number": { "type": "integer" },
+        "path": { "type": "string", "description": "File path relative to repo root" },
+        "line": { "type": "integer", "description": "Line number in the diff to annotate" },
+        "body": { "type": "string", "description": "Comment body" }
+      }
+    },
+    {
+      "name": "apply_pr_label",
+      "description": "Add or replace the review status label on a pull request",
+      "parameters": {
+        "repo": { "type": "string" },
+        "pr_number": { "type": "integer" },
+        "label": {
+          "type": "string",
+          "enum": ["✅ approved", "⚠️ needs-changes", "🔴 blocked"]
+        },
+        "remove_existing_review_labels": {
+          "type": "boolean",
+          "default": true,
+          "description": "Strip previous review labels before applying the new one"
+        }
+      }
+    },
+    {
+      "name": "get_pr_review_comments",
+      "description": "List all existing comments on a PR to detect prior bot reviews",
+      "parameters": {
+        "repo": { "type": "string" },
+        "pr_number": { "type": "integer" }
+      }
+    },
+    {
+      "name": "list_open_prs",
+      "description": "List all open pull requests in a repository with metadata",
+      "parameters": {
+        "repo": { "type": "string" },
+        "base": {
+          "type": "string",
+          "default": "main",
+          "description": "Filter by target base branch"
+        }
+      }
+    }
+  ]
+}

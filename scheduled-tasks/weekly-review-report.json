@@ -1,0 +1,30 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/scheduled_task.json",
+  "name": "weekly-review-report",
+  "description": "Monday morning report summarising all PR review activity from the past 7 days. Provides visibility into team review velocity, common issue patterns, and individual contribution stats. Posted to the team Google Chat space.",
+  "schedule": {
+    "cron": "0 8 * * 1",
+    "timezone": "Asia/Kolkata",
+    "description": "Every Monday at 8:00 AM IST"
+  },
+  "agent": "pr-review-agent",
+  "prompt": "Generate the weekly PR review report for the past 7 days across all configured repositories. Aggregate: total PRs reviewed, breakdown by verdict (approved / needs-changes / blocked), most common issue types flagged, average time from PR open to first review, and per-author PR count. Post the formatted report to the PR review Google Chat space.",
+  "script": "src/weekly_reporter.py",
+  "config": {
+    "lookback_days": 7,
+    "repositories": "${WATCHED_REPOS}",
+    "chat_space_id": "${GOOGLE_CHAT_SPACE_ID}"
+  },
+  "report_sections": [
+    "summary_stats",
+    "verdict_breakdown",
+    "top_issue_types",
+    "avg_review_time",
+    "per_author_breakdown"
+  ],
+  "timeout_seconds": 180,
+  "retry": {
+    "max_attempts": 2,
+    "delay_seconds": 60
+  }
+}

@@ -1,0 +1,51 @@
+name: PR Review Bot
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pip install google-genai requests
+
+      - name: Review PR with Gemini
+        shell: python
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          import os, sys
+          sys.path.insert(0, "src")
+          from reviewer import handle_pr
+
+          handle_pr({
+              "repository": {"full_name": os.environ["REPO"]},
+              "pull_request": {
+                  "number": int(os.environ["PR_NUMBER"]),
+                  "title": os.environ["PR_TITLE"],
+                  "user": {"login": os.environ["PR_AUTHOR"]},
+                  "base": {"ref": "main"},
+                  "head": {"sha": os.environ["PR_HEAD_SHA"]},
+                  "html_url": os.environ["PR_URL"],
+              },
+              "action": "opened",
+          })

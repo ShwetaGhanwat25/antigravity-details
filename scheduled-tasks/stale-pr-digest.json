@@ -1,0 +1,27 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/scheduled_task.json",
+  "name": "stale-pr-digest",
+  "description": "Daily morning digest that identifies pull requests that have been open for more than 24 hours without receiving an automated review. Posts a summary to the team Google Chat space so engineers can prioritise unreviewed work.",
+  "schedule": {
+    "cron": "0 9 * * 1-5",
+    "timezone": "Asia/Kolkata",
+    "description": "Weekdays at 9:00 AM IST"
+  },
+  "agent": "pr-review-agent",
+  "prompt": "Run the stale PR check across all configured repositories. List every open PR that has been waiting more than 24 hours without a bot review comment. Group them by repository. Post the digest to the PR review Google Chat space using the send_message tool. Format: one line per PR with the PR title, author, age in hours, and a direct link.",
+  "script": "src/stale_pr_checker.py",
+  "config": {
+    "stale_threshold_hours": 24,
+    "repositories": "${WATCHED_REPOS}",
+    "chat_space_id": "${GOOGLE_CHAT_SPACE_ID}"
+  },
+  "on_empty": {
+    "action": "send_message",
+    "message": "✅ *Daily PR Digest* — No stale PRs today. All pull requests have been reviewed within 24 hours."
+  },
+  "timeout_seconds": 120,
+  "retry": {
+    "max_attempts": 2,
+    "delay_seconds": 30
+  }
+}
