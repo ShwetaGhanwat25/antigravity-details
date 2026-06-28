@@ -32,6 +32,60 @@ plugin/skills/pr-review-trigger/SKILL.md   # defines how the CLI command runs th
 
 ---
 
+## Exact References — Where Antigravity Is Wired In
+
+Every place in the codebase where Antigravity reads a config, makes a decision, or takes over from the Python scripts.
+
+**`agent.md`**
+- Line 2 — `name: pr-review-agent` — the agent name Antigravity uses to identify and load this agent
+- Lines 10–12 — `skills:` block — tells Antigravity which skill files to load and run in sequence (pr-diff-analyzer first, then review-commenter)
+- Lines 13–15 — `mcps:` block — tells Antigravity which MCP connections to wire up before the agent runs
+- Line 68 — lists the 6 GitHub MCP tools the agent is allowed to call by name
+- Line 70 — lists the `send_message` Google Chat MCP tool
+
+**`mcp/github-mcp/mcp_config.json`**
+- Line 2 — `$schema` pointing to Antigravity's MCP schema — marks this file as an Antigravity-managed MCP config
+- Line 5 — `transport: stdio` — Antigravity spawns the MCP as a subprocess and communicates over stdin/stdout
+- Line 9 — `"GITHUB_TOKEN": "${GITHUB_TOKEN}"` — Antigravity injects the env var when starting the MCP process
+- Lines 11–77 — `tools:` array — the 6 GitHub API tools (`get_pr_diff`, `post_pr_comment`, `post_inline_comment`, `apply_pr_label`, `get_pr_review_comments`, `list_open_prs`) that the agent calls by name during a review
+
+**`mcp/google-chat-mcp/mcp_config.json`**
+- Line 2 — `$schema` — Antigravity MCP schema, same as above
+- Line 5 — `transport: sse` — unlike GitHub MCP, this connects to Google's remote MCP server over SSE instead of spawning a local subprocess
+- Line 6 — `url: https://chatmcp.googleapis.com/mcp/v1` — the remote MCP endpoint Antigravity connects to
+- Lines 7–12 — `auth: oauth2` — Antigravity handles the full OAuth2 login flow when you click Authenticate in the IDE
+- Line 15 — `default_space: ${GOOGLE_CHAT_SPACE_ID}` — Antigravity injects this so the agent doesn't need to specify the space on every call
+- Lines 19–31 — `send_message` tool definition — the only tool in this MCP; used by the agent every time it sends a notification
+
+**`scheduled-tasks/stale-pr-digest.json`**
+- Line 2 — `$schema` pointing to Antigravity's scheduled task schema — marks this as a scheduler config
+- Line 6 — `cron: "0 9 * * 1-5"` — Antigravity reads this to know when to fire the task (weekdays 9 AM IST)
+- Line 7 — `timezone: Asia/Kolkata` — Antigravity converts this to UTC when scheduling internally
+- Line 10 — `agent: pr-review-agent` — Antigravity routes the task to this specific agent when it fires
+- Line 11 — `prompt:` — the natural language instruction Antigravity sends to the agent as its input when the cron fires
+- Line 12 — `script: src/stale_pr_checker.py` — the Python script Antigravity executes directly (alternative to the agent prompt)
+- Lines 23–26 — `retry:` block — Antigravity retries the task up to 2 times with a 30-second delay if it fails
+
+**`scheduled-tasks/weekly-review-report.json`**
+- Line 6 — `cron: "0 8 * * 1"` — every Monday at 8 AM IST
+- Line 10 — `agent: pr-review-agent` — same agent, different task
+- Line 12 — `script: src/weekly_reporter.py` — the Python script Antigravity runs for this task
+- Lines 28–30 — `retry:` — 2 attempts, 60-second delay (longer than the digest because this task aggregates more data)
+
+**`plugin/plugin.json`**
+- Line 2 — `$schema` pointing to Antigravity's plugin schema — registers this directory as a CLI plugin
+- Line 3 — `name: pr-review` — the plugin name; this is what makes `antigravity pr-review` a valid CLI command
+- Lines 14–26 — `commands:` block — defines the exact usage, examples, and flags for `antigravity pr-review <repo> <pr-number>`
+- Lines 28–30 — `env_required:` — Antigravity validates that `GEMINI_API_KEY` and `GITHUB_TOKEN` are set before it lets the command run
+
+**`src/reviewer.py` — where Gemini is called (Antigravity invokes this via skills)**
+- Line 5 — `from google import genai` — imports the Gemini SDK
+- Line 17 — `_client = genai.Client(api_key=GEMINI_API_KEY)` — initialises the Gemini client at startup
+- Lines 141–150 — `_call_gemini()` function — the single place where the Gemini API is called; retries once on failure
+- Line 143 — `model="gemini-2.0-flash-lite"` — the specific Gemini model Antigravity's agent uses for every review
+
+---
+
 ## Prerequisites
 
 - Antigravity 2.0 installed (CLI + IDE)
