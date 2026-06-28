@@ -18,8 +18,10 @@ Scheduled Automation
 - Every Monday at 8 AM: posts a weekly report with total reviews, verdict breakdown, avg turnaround time, and per-author counts.
 
 Local Runner
-- `make start` — starts the webhook server and both scheduled jobs in one command; reports fire at their configured times.
-- `make now` — runs both reports immediately without waiting for the schedule, then starts the webhook server.
+- `make reports` — runs both reports immediately and exits. No webhook server. Use this to demo reports standalone.
+- `make reports-scheduled` — runs both reports on their real schedules (weekdays 9 AM / Mondays 8 AM). No webhook server.
+- `make start` — full system: webhook server for AI PR review + both reports on their real schedules.
+- `make now` — both reports immediately, then starts the webhook server.
 - `make install` — installs all dependencies.
 
 Testing
