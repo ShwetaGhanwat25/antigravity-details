@@ -27,14 +27,16 @@ On a schedule:
 # Install dependencies
 make install
 
-# Run everything — webhook server + scheduled reports at their configured times
-make start
+# Reports only — no webhook server
+make reports              # run both reports immediately and exit
+make reports-scheduled    # run both reports on their real schedules (9 AM / Monday 8 AM)
 
-# Run both reports right now, then start the webhook server
-make now
+# Full system — reports + AI PR review via webhook
+make start                # webhook server + reports on their real schedules
+make now                  # both reports immediately, then starts the webhook server
 ```
 
-For testing without running the full server:
+For testing the AI reviewer without a server:
 ```bash
 python src/test_reviewer.py                  # fake diff, no GitHub writes
 python src/test_reviewer.py --dry-run <PR#>  # real diff, prints review, no writes
@@ -74,15 +76,22 @@ auto-pr-review/
 
 ---
 
-## Two Ways to Run
+## Ways to Run
 
-**Option A — GitHub Actions (recommended, no server needed)**
+**Reports only (no AI PR review)**
+Run `make reports` or `make reports-scheduled` — no server, no ngrok, just the two scheduled reports.
+
+**Option A — GitHub Actions (recommended for AI PR review, no server needed)**
 Push `.github/workflows/pr-review.yml` to the target repo and add secrets. The workflow runs automatically on every PR.
 → See `SETUP_GUIDE.md` for the full steps.
 
-**Option B — Local Flask server**
-Run `make start` and point a GitHub webhook at the exposed URL via ngrok.
+**Option B — Local Flask server + ngrok**
+Run `make start` and point a GitHub webhook at the exposed ngrok URL.
 → See `SETUP_GUIDE.md` for the full steps.
+
+**Option C — Antigravity agent platform**
+Load `agent.md` into Antigravity, register the MCPs, and let Antigravity handle triggers and scheduling.
+→ See `ANTIGRAVITY_GUIDE.md` for the full steps.
 
 ---
 
