@@ -117,5 +117,6 @@ Run `make start` and point a GitHub webhook at the exposed URL via ngrok.
 | File | What it covers |
 |---|---|
 | `FEATURES.md` | Full feature list at a glance |
-| `SETUP_GUIDE.md` | Step-by-step setup from scratch |
+| `SETUP_GUIDE.md` | Step-by-step setup using Python scripts + GitHub Actions |
+| `ANTIGRAVITY_GUIDE.md` | Step-by-step setup using the Antigravity agent platform |
 | `CODEBASE.md` | What every file does |
