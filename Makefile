@@ -14,7 +14,7 @@
 .PHONY: install reports reports-scheduled start now
 
 install:
-	pip install -r src/requirements.txt
+	python -m pip install -r src/requirements.txt
 
 # Runs stale PR digest + weekly report immediately, then exits. No webhook server.
 reports:
